@@ -461,6 +461,41 @@ TEST_F(BinaryFunctionsTest, fromBase64Url) {
   EXPECT_THROW(fromBase64Url("YQ=/"), VeloxUserError);
 }
 
+TEST_F(BinaryFunctionsTest, toBase32) {
+  const auto toBase32 = [&](std::optional<std::string> value) {
+    return evaluateOnce<std::string>("to_base32(cast(c0 as varbinary))", value);
+  };
+
+  EXPECT_EQ(std::nullopt, toBase32(std::nullopt));
+  EXPECT_EQ("", toBase32(""));
+  EXPECT_EQ("ME======", toBase32("a"));
+  EXPECT_EQ("MFRGG===", toBase32("abc"));
+  EXPECT_EQ("NBSWY3DPEB3W64TMMQ======", toBase32("hello world"));
+  EXPECT_EQ(
+      "JBSWY3DPEBLW64TMMQQGM4TPNUQFMZLMN54CC===",
+      toBase32("Hello World from Velox!"));
+}
+
+TEST_F(BinaryFunctionsTest, fromBase32) {
+  const auto fromBase32 = [&](std::optional<std::string> value) {
+    return evaluateOnce<std::string>("from_base32(c0)", value);
+  };
+
+  EXPECT_EQ(std::nullopt, fromBase32(std::nullopt));
+  EXPECT_EQ("", fromBase32(""));
+  EXPECT_EQ("a", fromBase32("ME======"));
+  EXPECT_EQ("abc", fromBase32("MFRGG==="));
+  EXPECT_EQ("hello world", fromBase32("NBSWY3DPEB3W64TMMQ======"));
+  EXPECT_EQ(
+      "Hello World from Velox!",
+      fromBase32("JBSWY3DPEBLW64TMMQQGM4TPNUQFMZLMN54CC==="));
+
+  EXPECT_THROW(fromBase32("1="), VeloxUserError);
+  EXPECT_THROW(fromBase32("M1======"), VeloxUserError);
+  // EXPECT_THROW(fromBase32("1="), VeloxUserError);  AS VARBINARY
+  // EXPECT_THROW(fromBase32("M1======"), VeloxUserError); AS VARBINARY
+}
+
 TEST_F(BinaryFunctionsTest, fromBigEndian32) {
   const auto fromBigEndian32 = [&](const std::optional<std::string>& arg) {
     return evaluateOnce<int32_t, std::string>(

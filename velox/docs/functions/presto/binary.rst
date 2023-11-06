@@ -22,6 +22,10 @@ Binary Functions
 
     Decodes ``bigint`` value from a 64-bit 2’s complement big endian ``binary``.
 
+.. function:: from_base32(string) -> varbinary
+    
+    Decodes binary data from the base32 encoded ``string``.
+
 .. function:: from_hex(string) -> varbinary
 
     Decodes binary data from the hex encoded ``string``.
@@ -85,6 +89,10 @@ Binary Functions
  .. function:: to_big_endian_64(bigint) -> varbinary
 
      Encodes ``bigint`` in a 64-bit 2’s complement big endian format.
+
+.. function:: to_base32(binary) -> varchar
+
+    Encodes ``binary`` into a base32 string representation.
 
 .. function:: to_hex(binary) -> varchar
 

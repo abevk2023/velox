@@ -12,5 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-add_library(velox_encode Base64.cpp)
+add_library(velox_encode Base64.cpp Base32.cpp)
+
 target_link_libraries(velox_encode PUBLIC Folly::folly)

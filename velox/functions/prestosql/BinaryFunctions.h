@@ -24,6 +24,7 @@
 #include "folly/ssl/OpenSSLHash.h"
 #pragma GCC diagnostic pop
 #include "velox/common/base/BitUtil.h"
+#include "velox/common/encode/Base32.h"
 #include "velox/common/encode/Base64.h"
 #include "velox/external/md5/md5.h"
 #include "velox/functions/Udf.h"
@@ -353,6 +354,36 @@ struct ToBase64UrlFunction {
       const arg_type<Varbinary>& input) {
     result.resize(encoding::Base64::calculateEncodedSize(input.size()));
     encoding::Base64::encodeUrl(input.data(), input.size(), result.data());
+  }
+};
+
+template <typename T>
+struct ToBase32Function {
+  VELOX_DEFINE_FUNCTION_TYPES(T);
+
+  FOLLY_ALWAYS_INLINE void call(
+      out_type<Varchar>& result,
+      const arg_type<Varbinary>& input) {
+    result.resize(encoding::Base32::calculateEncodedSize(input.size()));
+    encoding::Base32::encode(input.data(), input.size(), result.data());
+  }
+};
+
+template <typename T>
+struct FromBase32Function {
+  VELOX_DEFINE_FUNCTION_TYPES(T);
+
+  FOLLY_ALWAYS_INLINE void call(
+      out_type<Varbinary>& result,
+      const arg_type<Varchar>& input) {
+    try {
+      auto inputSize = input.size();
+      result.resize(
+          encoding::Base32::calculateDecodedSize(input.data(), inputSize));
+      encoding::Base32::decode(input.data(), input.size(), result.data());
+    } catch (const encoding::Base32Exception& e) {
+      VELOX_USER_FAIL(e.what());
+    }
   }
 };
 
